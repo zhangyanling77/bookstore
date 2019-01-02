@@ -1,0 +1,299 @@
+<style lang="less" scoped>
+.detail-container{
+    width: 100%;
+    .img-container{
+        width: 100%;
+        text-align: center;
+        border-bottom: 1px solid #c33979;
+    }
+    .row{
+        line-height: 20px;
+        margin: 8px;
+        font-size: 13px;
+        .right{
+            float: right;
+            font-size: 12px;
+        }
+        .left{
+            margin-right: 80px;
+            font-size: 12px;
+        }
+        .avatar-img{
+            width: 22px; 
+            height:22px; 
+            border-radius: 50%;
+            vertical-align: middle;
+            border: 1px solid #999;
+            margin-right:5px;
+        }
+        .tags{
+            display: inline-block;
+            border: 1px solid #c33979;
+            border-radius: 4px;
+            padding: 2px 8px;
+            margin: 0 4px 4px 0;
+            font-size: 12px;
+        }
+        .price{
+            color: #c33979;
+        }
+    }
+    .rate{
+        position: relative;
+        display: inline-block;
+        color: #c33979;
+        .hollow{
+            position: absolute;
+            display: inline-block;
+            top:0;
+            left:0;
+            width:0;
+            overflow:hidden;
+        }
+    }
+    .comment{
+        margin-top:10px;
+        font-size: 14px;
+        .textarea{
+            width:730rpx;
+            height:200rpx;
+            background:#eee;
+            padding:10rpx;
+        }
+        .location{
+            margin-top:10px;
+            padding:5px 10px;
+        }
+        .phone{
+            margin-top:10px;
+            padding:5px 10px;
+            
+        }
+    }
+    .text-footer{
+        text-align: center;
+        font-size: 14px;
+        margin: 5px;
+        color: #c33979;
+    }
+    .btn{
+        margin: 5px 10px;
+        background-color: #c33979;
+        color: #fff;
+    }
+}
+</style>
+
+<template>
+    <view class='detail-container'>
+        <view class='img-container'>
+            <image src="{{ book.image }}" mode="aspectFit"/>
+        </view>
+        <view class="row">
+          <text>书名：{{ book.title }}</text>
+        </view>
+        <view class="row">
+          <text>作者：{{ book.author?book.author:"作者不详" }}</text>
+        </view>
+        <view class="row">
+            <view class="right">
+            {{ book.rate }} <view class="rate">
+                <view>☆☆☆☆☆</view>
+                <view class="hollow" style="{{ tool.getWidth(book.rate) }}">
+                ★★★★★
+                </view>
+            </view>
+            </view>
+            <view class="left">
+                <image src="{{ book.user_info.avatarUrl }}" class="avatar-img"/>
+                <text>{{ book.user_info.nickName }}</text>
+            </view>
+        </view>
+        <view class="row">
+          <view class="right price">¥{{ book.price }}</view>
+          <view class="left">{{ book.publisher?book.publisher:"出版社未知" }}</view>
+        </view>
+        <view class="row">
+            <repeat for="{{ tool.getTags(book.tags) }}" item="item" key="index">
+                <view class="tags">{{ item }}</view>
+            </repeat>
+        </view>
+        <view class="row">
+            <text class="summary">简介：{{ book.summary?book.summary:"暂无简介" }}</text>
+        </view>
+        <CommentList :comments.sync="comments"></CommentList>
+        <view class="comment" wx:if="{{showAdd}}">
+            <textarea 
+                    value='{{comment}}'
+                    @input='getComment'
+                    class='textarea'
+                    maxlength='{{100}}'
+                    placeholder='请输入评论（100字以内）'></textarea>
+            <view class='location'>
+                地理位置：
+                <switch color='#c33979' checked='{{location}}' @change='getGeo'></switch>
+                <text class='text-primary'>{{location}}</text>
+            </view>
+            <view class='phone'>
+                手机型号：
+                <switch color='#c33979' checked='{{phone}}' @change='getPhone'></switch>
+                <text class='text-primary'>{{phone}}</text>
+            </view>
+            <button class="btn" @tap='addComment'>评论</button>
+        </view>
+        <view wx:else class='text-footer'>
+            <text>{{ msg }}</text>
+        </view>
+        <button open-type='share' class="btn">转发给好友</button>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import toolWxs from '../../mixins/tool.wxs'
+import { get, post, showModel, showWarning } from '@/util'
+import CommentList from '@/components/CommentList'
+
+export default class Detail extends wepy.page{
+    config = {
+      navigationBarTitleText: '详情',
+      navigationBarBackgroundColor: '#c33979',
+      navigationBarTextStyle: '#fff'
+    }
+    components = {
+        CommentList
+    }
+
+    data = {
+        bookid: '',
+        book: {},
+        userinfo: null,
+        comment :'',
+        comments: [],
+        location: '',
+        phone: '',
+        msg: ''
+    }
+
+    wxs = {
+        tool: toolWxs
+    }
+
+    computed = {
+        showAdd () {
+            // 没登录
+            if (!this.userinfo) {
+                this.msg = '登录后方可评论'
+                return false
+            }
+            // 评论页面里查到有自己的openid
+            if (this.comments.filter(v => v.openid === this.userinfo.openId).length) {
+                this.msg = '你已经评论过了'
+                return false
+            }
+            return true
+        }
+    }
+
+    methods = {
+        getComment(e){
+            // console.log(e.detail.value)
+            this.comment = e.detail.value
+        },
+        getGeo (e) {
+            // console.log("获取地理位置", e)
+            const ak = 'D77tIlL7dEvXIcSRVaGm1LV25EU5xF0p'
+            let url = 'http://api.map.baidu.com/geocoder/v2/'
+
+            if (e.detail.value) {
+                wx.getLocation({
+                    success: geo => {
+                        // console.log(geo)
+                        wx.request({
+                            url,
+                            data: {
+                                ak,
+                                location: `${geo.latitude},${geo.longitude}`,
+                                output: 'json'
+                            },
+                            success: res => {
+                                // console.log(res)
+                                if (res.data.status === 0) {
+                                    let addr = res.data.result.addressComponent;
+                                    this.location = addr.city
+                                } else {
+                                    this.location = '未知地点'
+                                }
+                                this.$apply();
+                            }
+                        })
+                    }
+                })
+            } else {
+                this.location = ''
+            }
+        },
+        getPhone (e) {
+            // console.log('手机型号获取中', e)
+            if (e.detail.value) {
+                const phoneInfo = wx.getSystemInfoSync()
+                // console.log(phoneInfo)
+                this.phone = phoneInfo.model
+            } else {
+                // 没选中
+                this.phone = ''
+            }
+        },
+        async addComment () {
+            if (!this.comment) {
+                showWarning('评论内容为空！')
+                return;
+            }
+            // 评论内容 手机型号  地理位置 图书id 用户的openid
+            const data = {
+                openid: this.userinfo.openId,
+                bookid: this.bookid,
+                comment: this.comment,
+                phone: this.phone,
+                location: this.location
+            }
+            // console.log(data)
+            try {
+                await post('/addcomment', data)
+                this.comment = ''
+                this.getComments();
+            } catch (e) {
+                showModel('评论失败', e.msg)
+            }
+        },
+    }
+
+    async getDetail(){
+        const res = await get('/bookdetail', { id: this.bookid })
+        // console.log(res,"result")
+        this.book = res.data
+        this.$apply()
+    }
+
+    async getComments () {
+      const comments = await get('/commentlist', { bookid: this.bookid })
+    //   console.log('comments', comments)
+      this.comments = comments.list || []
+      this.$apply();
+    }
+
+    onShow(){
+        let userinfo = wx.getStorageSync('userinfo');
+        if (userinfo) {
+            this.userinfo = userinfo
+        }
+        this.getDetail()
+        this.getComments()
+    }
+
+    onLoad(option){
+        this.bookid = option.id
+    }
+}
+</script>
+

@@ -1,0 +1,31 @@
+<style lang="less" scoped>
+.like-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+</style>
+
+<template>
+    <view class='like-container'>
+        <view>此页面为列表页，显示添加的我评论过的书籍列表</view>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class Like extends wepy.page{
+    config = {
+      navigationBarTitleText: '喜欢',
+      navigationBarBackgroundColor: '#c33979',
+      navigationBarTextStyle: '#fff'
+    }
+
+    data = {}
+
+    methods = {}
+}
+</script>
+

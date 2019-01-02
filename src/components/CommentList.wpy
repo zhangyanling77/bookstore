@@ -1,0 +1,75 @@
+<style lang='less'>
+.comment-list{
+  background:#eee;
+  font-size:14px;
+  .page-title{
+    padding: 5px;
+  }
+  .comment{
+    background: white;
+    margin-bottom:10px;
+    padding:5px 20px;
+    .content{
+      margin:10px 0;
+    }
+    .user{
+      .inline{
+        display:inline;
+        .avatar{
+          width:20px;
+          height:20px;
+          border: 1px solid #999;
+          border-radius: 50%;
+          vertical-align: middle;
+        }
+        .name{
+          line-height: 22px;
+          margin-left: 5px;
+        }
+      }
+      .right{
+        float: right;
+      }
+    }
+  }
+}
+</style>
+<template>
+  <view class="comment-list">
+    <view class="page-title" wx:if='comments.length'>
+      评论
+    </view>
+    <view class="comment">
+        <repeat for="{{ comments }}" item="item" key="item.id">
+            <view class="user">
+                <view class="inline">
+                  <image src="{{item.image}}" 
+                    class="avatar"
+                    mode='aspectFit'
+                  />
+                  <text class="name">{{item.title}}</text>
+                </view>
+                <view class="right">
+                  <text>{{item.location||'未知地点'}}</text>
+                  <text class="text-primary">-</text>
+                  <text>{{item.phone||'未知型号'}}</text>
+                </view>
+            </view>
+            <view class="content">
+                {{item.comment}}
+            </view>
+        </repeat>
+    </view>  
+  </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+
+export default class CommentList extends wepy.component {
+
+    props = {
+        comments: Array
+    }
+}
+</script>

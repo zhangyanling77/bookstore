@@ -1,0 +1,18 @@
+module.exports = {
+    sliceStr: function(str, num) {
+        if (!str) {
+            return;
+        }
+        var _str = str.length > num ? str.slice(0, num) + "..." : str;
+        return _str;
+    },
+    getWidth: function(val){
+        var rate = (val/2).toFixed(1)
+        return 'width:' + rate + 'em';
+    },
+    getTags: function(tags){
+        var _tags = tags ? tags.split(',') : [];
+        
+        return _tags
+    }
+}

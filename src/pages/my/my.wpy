@@ -1,0 +1,148 @@
+<style lang="less" scoped>
+.my-container{
+    .userinfo {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 100rpx 0;
+    }
+
+    .userinfo-avatar {
+        width: 150rpx;
+        height: 150rpx;
+        border-radius: 50%;
+    }
+
+    .userinfo-nickname {
+        color: #999;
+        font-size: 30rpx;
+        margin-top: 20rpx;
+    }
+    .time-info{
+        padding: 0 20rpx;
+        text-align: center;
+    }
+    .button-style{
+        margin: 100rpx 20rpx;
+        button{
+            background-color: #c33979;
+        }
+    }
+}
+</style>
+
+<template>
+    <view class='my-container'>
+        <view class="userinfo" @tap="tapLogin">
+            <image style="border: 2px solid #c33979;" class="userinfo-avatar" src="{{ userinfo.avatarUrl }}" background-size="cover"/>
+            <view class="userinfo-nickname">{{ userinfo.nickName }}</view>
+        </view>
+        <view class='time-info'>
+            <text>{{ year }}年已经过去{{ days }}天了</text>
+            <progress percent="{{ percent }}" show-info color="#c33979"/>
+        </view>
+        <view class='button-style'>
+            <button wx:if="{{ userinfo.openId }}" type="primary" @tap="scanBook">添加图书</button>
+        </view>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import config from '@/config'
+import { get, post, showSuccess, showModal, showWarning, isLeapYear } from '@/util'
+import qcloud from 'wafer2-client-sdk'
+
+export default class My extends wepy.page{
+    config = {
+      navigationBarTitleText: '我的',
+      navigationBarBackgroundColor: '#c33979',
+      navigationBarTextStyle: '#fff'
+    }
+
+    data = {
+        userinfo: {
+            avatarUrl: '../../images/round_people_fill.png',
+            nickName: '点击登录'
+        },
+        year: new Date().getFullYear(),
+        days: this.getCurrentDaysOfYear()
+    }
+
+    computed = {
+        percent(){
+            let total = isLeapYear(this.year)? 366: 365;
+            let percent = (this.days*100/total).toFixed(2)
+            return percent
+        }
+    }
+
+    methods = {
+        tapLogin(){
+            let user = wx.getStorageSync('userinfo');
+            if(!user){
+                this.login()
+            }else{
+                showWarning('请勿重复登录！')
+            }
+        },
+        async scanBook(){
+            wx.scanCode({
+                success: res => {
+                    console.log("扫码结果", res)
+                    this.addBook(res.result)
+                }
+            })
+        }
+    }
+
+    getCurrentDaysOfYear () {
+        let start = new Date()
+        start.setMonth(0)
+        start.setDate(1)
+
+        let offset = new Date().getTime() - start.getTime()
+        return parseInt(offset/1000/60/60/24) + 1
+    }
+
+    async addBook(isbn){
+        // console.log(isbn)
+        const res = await post('/addBook', {
+            isbn: isbn,
+            openid: this.userinfo.openId
+        })
+        showModal('添加成功',`《${res.title}》添加成功`)
+        wx.navigateTo({
+            url: '/pages/home/home'
+        })
+        this.$apply()
+    }
+
+    login(){
+        // 登陆并获取个人信息
+        qcloud.setLoginUrl(config.loginUrl)
+        qcloud.request({
+            url: config.userUrl,
+            login: true,
+            success: res => {
+                wx.setStorageSync('userinfo', res.data.data)
+                this.userinfo = res.data.data
+                showSuccess('登录成功！')
+                this.$apply()
+            },
+            fail: err => {
+                console.log(err)
+            }
+        })
+    }
+
+    onShow () {
+        let userinfo = wx.getStorageSync('userinfo');
+        // console.log("本地存储", userinfo)
+        if (userinfo) {
+            this.userinfo = userinfo
+        }
+    }
+}
+</script>
+

@@ -1,0 +1,83 @@
+<style lang="less">
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+</style>
+
+<script>
+import wepy from 'wepy'
+import 'wepy-async-function' // 允许使用异步函数 async/await
+
+import { setStore } from 'wepy-redux'
+import configStore from './store'
+
+const store = configStore()
+setStore(store)
+
+// ,
+// {
+//   pagePath: 'pages/like/like',
+//   text: '喜欢',
+//   iconPath: 'images/like.png',
+//   selectedIconPath: 'images/like_fill.png'
+// },
+
+export default class extends wepy.app {
+  config = {
+    pages: [
+      'pages/home/home',
+      'pages/like/like',
+      'pages/detail/detail',
+      'pages/my/my'
+    ],
+    window: {
+      backgroundTextStyle: 'light',
+      navigationBarBackgroundColor: '#fff',
+      navigationBarTitleText: '一江西流书馆',
+      navigationBarTextStyle: 'black'
+    },
+    tabBar: {
+      color: '#000',
+      selectedColor: '#c33979',
+      list: [{
+        pagePath: 'pages/home/home',
+        text: '书馆',
+        iconPath: 'images/home.png',
+        selectedIconPath: 'images/home_fill.png'
+      },{
+        pagePath: 'pages/my/my',
+        text: '我的',
+        iconPath: 'images/people.png',
+        selectedIconPath: 'images/people_fill.png'
+      }]
+    }
+  }
+
+  globalData = {
+    userInfo: null
+  }
+
+  constructor () {
+    super()
+    this.use('requestfix')
+  }
+
+  getUserInfo(cb) {
+    const that = this
+    if (this.globalData.userInfo) {
+      return this.globalData.userInfo
+    }
+    wepy.getUserInfo({
+      success (res) {
+        that.globalData.userInfo = res.userInfo
+        cb && cb(res.userInfo)
+      }
+    })
+  }
+}
+</script>

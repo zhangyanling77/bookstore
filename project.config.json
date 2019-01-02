@@ -1,0 +1,17 @@
+{
+	"description": "A WePY project",
+	"setting": {
+		"urlCheck": false,
+		"es6": false,
+		"postcss": false,
+		"minified": false,
+		"newFeature": true,
+		"nodeModules": false
+	},
+	"compileType": "miniprogram",
+	"appid": "wx498797a84907f2ab",
+	"projectname": "mywx",
+	"miniprogramRoot": "./dist",
+	"qcloudRoot": "./server/",
+	"condition": {}
+}

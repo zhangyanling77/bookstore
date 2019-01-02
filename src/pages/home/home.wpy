@@ -1,0 +1,128 @@
+<style lang="less" scoped>
+.home-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    background-color: #eee;
+    .home-swiper{
+        width: 100%;
+    }
+    .slide-image{
+        width: 100%;
+        height: 100%;
+    }
+    .book-lists{
+        width: 100%;
+    }
+}
+
+</style>
+
+<template>
+    <view class='home-container'>
+        <swiper class='home-swiper' indicator-dots="{{indicatorDots}}" indicator-color="#ffffff" indicator-active-color="#c33979"
+            autoplay="{{autoplay}}" interval="{{interval}}" duration="{{duration}}">
+            <repeat for="{{imgUrls}}" item="item" key="index">
+                <swiper-item>
+                    <image src="{{item}}" class="slide-image" mode="scaleToFill"/>
+                </swiper-item>
+            </repeat>
+        </swiper>
+        <scroll-view scroll-y="{{isScrollY}}" scroll-with-animation="true">
+            <view class="book-lists">
+                <repeat for="{{books}}" item="item" key="index">
+                    <Card :book.sync="item"></Card>
+                </repeat>
+            </view>
+        </scroll-view>
+    </view>
+</template>
+
+<script>
+import wepy from 'wepy'
+import { get, showWarning } from '@/util'
+import Card from '@/components/Card'
+
+export default class Home extends wepy.page{
+    config = {
+      navigationBarTitleText: '书馆',
+      navigationBarBackgroundColor: '#c33979',
+      navigationBarTextStyle: '#fff',
+      enablePullDownRefresh: true
+    }
+
+    data = {
+        imgUrls: [
+            '../../images/banner5.jpg',
+            '../../images/banner6.jpg',
+            '../../images/banner7.jpg',
+        ],
+        indicatorDots: true,
+        autoplay: true,
+        interval: 3000,
+        duration: 1000,
+        isScrollY: true,
+        books: [],
+        current: 1,
+        pageNum: 10,
+        more: true
+    }
+
+    components = {
+        Card
+    }
+
+    methods = {}
+
+    async getList(init) {
+        if(init){
+            this.current = 1
+            this.more = true
+        }
+        wx.showNavigationBarLoading()
+        let params = {
+            limit: this.pageNum,
+            offset: (this.current -1)*this.pageNum
+        }
+        const res = await get('/booklist', params)
+        // console.log(res)
+        const _books = res.data.list
+
+        if(_books.length<10 && this.current>1){
+            this.more = false
+        }
+        if(init){
+            this.books = _books
+            wx.stopPullDownRefresh()
+        }else{
+            // 下拉刷新，不能直接覆盖books 而是累加
+            this.books = this.books.concat(_books)
+        }
+
+        wx.hideNavigationBarLoading()
+        this.$apply()
+    }
+
+    onShow(){
+        this.getList(true)
+    }
+
+    onPullDownRefresh(){
+        // console.log("触发了下拉刷新事件！")
+        this.getList(true)
+    }
+
+    onReachBottom() {
+        // console.log("触发了触底事件！")
+        if(!this.more){
+            showWarning('没有更多数据了！')
+            return false
+        }
+        this.current = this.current + 1
+        this.getList()
+    }
+
+}
+</script>
+

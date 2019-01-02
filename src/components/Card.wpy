@@ -1,0 +1,119 @@
+<style lang='less' scoped>
+    .book-card{
+        padding: 5px;
+        overflow: hidden;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        font-size: 14px;
+        background-color: #fff;
+        .thumb{
+            width: 90px;
+            height: 90px;
+            float: left;
+            margin: 0 auto;
+            overflow: hidden;
+            .img{
+            max-width: 100%;
+            max-height: 100%;
+            }
+        }
+        .detail{
+            margin-left: 100px;
+            font-size: 13px;
+            .row{
+                line-height: 20px;
+                margin-bottom: 3px;
+            }
+            .right{
+                float: right;
+            }
+            .left{
+                margin-right: 80px;
+            }
+        }
+        .rate{
+            position: relative;
+            display: inline-block;
+            color: #c33979;
+            .hollow{
+                position: absolute;
+                display: inline-block;
+                top:0;
+                left:0;
+                width:0;
+                overflow:hidden;
+            }
+        }
+    }
+</style>
+<template>
+  <view class="book-card" @tap="goDetail">
+    <view class="thumb" @tap.stop="preview">
+        <image class="img" src="{{ book.image }}" mode="aspectFit" />
+    </view>
+    <view class="detail">
+      <view class="row text-primary">
+        <view class="right">
+          {{ book.rate }} <view class="rate">
+            <view>☆☆☆☆☆</view>
+            <view class="hollow" style="{{ tool.getWidth(book.rate) }}">
+            ★★★★★
+            </view>
+        </view>
+        </view>
+        <view class="left">{{ tool.sliceStr(book.title, 15) }}</view>
+      </view>
+      <view class="row">
+        <view class="right text-primary">浏览量:{{ book.count }}</view>
+        <view class="left">{{ book.author?tool.sliceStr(book.author, 18):"作者不详" }}</view>
+      </view>
+      <view class="row">
+        <view class="right">{{ book.nickName }}</view>
+        <view class="left">{{ book.publisher?book.publisher:"出版社未知" }}</view>
+      </view>
+    </view>
+  </view>
+</template>
+<script>
+    import wepy from 'wepy'
+    import toolWxs from '../mixins/tool.wxs' // 导入工具函数
+
+    export default class Card extends wepy.component {
+
+        props = {
+            book: Object
+        }
+
+        wxs = {
+            tool: toolWxs
+        }
+
+        methods = {
+            goDetail() {
+                wx.navigateTo({
+                    url: '/pages/detail/detail?type=main&id='+ this.book.id
+                })
+            },
+            /**
+             * 预览图片
+             */
+            preview() {
+                wx.previewImage({
+                    current: this.book.image,
+                    urls: [this.book.image]
+                })
+            }
+        }
+
+    }
+</script>
+
+
+
+
+
+
+
+
+
+

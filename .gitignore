@@ -1,0 +1,21 @@
+
+# npm dependencied
+node_modules
+
+#production
+dist
+dist.zip
+dist.rar
+# roadhog-api-doc ignore
+src/utils/request-temp.js
+_roadhog-api-doc
+
+# misc
+.DS_Store
+npm-debug.log*
+yarn-error.log
+
+coverage
+#yarn.lock
+#package-lock.json
+jsconfig.json
