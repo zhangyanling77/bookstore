@@ -5,7 +5,7 @@ const CONF = {
     // 腾讯云相关配置可以查看云 API 秘钥控制台：https://console.cloud.tencent.com/capi
     qcloudAppId: '',//腾讯云用户中心
     qcloudSecretId: '',//访问管理-云API密钥
-    qcloudSecretKey: 'hCUbS7XhfNp0vay6yZuyOdeR0NbdR2PZ',
+    qcloudSecretKey: '',//访问管理-云API密钥
     wxMessageToken: 'weixinmsgtoken',
     networkTimeout: 30000,
 
