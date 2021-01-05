@@ -170,6 +170,12 @@ axios@^0.16.2:
     follow-redirects "^1.2.3"
     is-buffer "^1.1.5"
 
+axios@^0.21.1:
+  version "0.21.1"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-0.21.1.tgz#22563481962f4d6bde9a76d516ef0e5d3c09b2b8"
+  dependencies:
+    follow-redirects "^1.10.0"
+
 babel-code-frame@^6.16.0, babel-code-frame@^6.22.0, babel-code-frame@^6.26.0:
   version "6.26.0"
   resolved "http://registry.npm.taobao.org/babel-code-frame/download/babel-code-frame-6.26.0.tgz#63fd43f7dc1e3bb7ce35947db8fe369a3f58c74b"
@@ -871,11 +877,9 @@ follow-redirects@1.0.0:
   dependencies:
     debug "^2.2.0"
 
-follow-redirects@^1.2.3:
-  version "1.5.7"
-  resolved "http://registry.npm.taobao.org/follow-redirects/download/follow-redirects-1.5.7.tgz#a39e4804dacb90202bca76a9e2ac10433ca6a69a"
-  dependencies:
-    debug "^3.1.0"
+follow-redirects@^1.10.0, follow-redirects@^1.2.3:
+  version "1.13.1"
+  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.13.1.tgz#5f69b813376cee4fd0474a3aba835df04ab763b7"
 
 for-in@^1.0.1:
   version "1.0.2"
